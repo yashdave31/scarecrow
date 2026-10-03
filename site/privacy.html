@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scarecrow privacy policy</title>
+<style>
+:root{--bg:#FAFAF8;--ink:#14141A;--muted:#55555F;--accent:#D63A27}
+@media(prefers-color-scheme:dark){:root{--bg:#121214;--ink:#F2F2EE;--muted:#A4A4AE;--accent:#FF6B57}}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.6 "Avenir Next","Segoe UI Variable Display","Helvetica Neue",system-ui,sans-serif}
+main{max-width:680px;margin:0 auto;padding:48px 24px 96px}
+h1{font-size:44px;letter-spacing:-.035em;line-height:1.05;margin:0 0 8px}
+h2{font-size:24px;letter-spacing:-.03em;margin:40px 0 8px}
+p,li{color:var(--muted)}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+<p><a href="./">Scarecrow</a></p>
+<h1>Privacy policy</h1>
+<p>Last updated October 3, 2026.</p>
+
+<h2>What Scarecrow does with your data</h2>
+<p>Scarecrow runs in your browser on x.com and twitter.com. It reads the tweets on the page so it can check them against the filters you wrote. It does not collect, store or sell personal data, and it has no server, accounts or analytics.</p>
+
+<h2>What is stored on your device</h2>
+<ul>
+<li>Your filters and settings.</li>
+<li>Your API key for OpenRouter or NanoGPT, if you add one.</li>
+<li>Counts of how many tweets were hidden.</li>
+</ul>
+<p>All of this lives in your browser's extension storage (<code>chrome.storage.local</code>). It never leaves your device except as described below. Uninstalling the extension deletes it.</p>
+
+<h2>What is sent to other services</h2>
+<p>Keyword filters run entirely in your browser and send nothing.</p>
+<p>Described filters and image checks need a model. When they run, Scarecrow sends the text of the tweet being checked, and your filter descriptions, to the provider you chose (OpenRouter or NanoGPT) using your own API key. If you turn on image checks, it also sends the tweet's images and a few frames of its videos to that provider. These requests go straight from your browser to the provider. We never see them. What the provider does with them is covered by its own privacy policy.</p>
+<p>Scarecrow fetches tweet images from X's image host (pbs.twimg.com) so it can pass them to the provider.</p>
+
+<h2>What we do not do</h2>
+<ul>
+<li>We do not send your data to any server run by Scarecrow's authors.</li>
+<li>We do not use your data for advertising, profiling or any purpose unrelated to filtering your feed.</li>
+<li>We do not sell or transfer your data to third parties, other than the provider you chose, as described above.</li>
+</ul>
+
+<h2>Permissions</h2>
+<p>Scarecrow asks for access to x.com and twitter.com to read and fold tweets, to pbs.twimg.com to fetch tweet images, to openrouter.ai and nano-gpt.com to call the provider you choose, and to extension storage to keep your settings.</p>
+
+<h2>Contact</h2>
+<p>Questions or concerns: open an issue at <a href="https://github.com/yashdave31/scarecrow/issues">github.com/yashdave31/scarecrow</a>.</p>
+</main>
+</body>
+</html>

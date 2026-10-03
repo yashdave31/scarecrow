@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
-const SKIP = new Set(["dist", "scripts", "README.md", "package.json", "node_modules", "LICENSE", "docs", "site"]);
+const SKIP = new Set(["dist", "scripts", "README.md", "package.json", "node_modules", "LICENSE", "docs", "site", "store"]);
 
 const PROD_CONFIG = `// Production build. Test mode is off and cannot be turned on.
 const FF_CONFIG = Object.freeze({ mockDecisions: false, mockHideRate: 0, mockLatencyMs: [0, 0] });
