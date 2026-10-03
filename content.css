@@ -3,28 +3,20 @@
 
 article[data-testid="tweet"] { position: relative; }
 
-/* Not looked at yet, or being checked: blurred, with a soft scanning sheen.
+/* Not looked at yet, or being checked: held back (invisible, layout intact).
    The :not([data-ff]) part applies from the very first frame X paints a tweet,
-   before any script runs, so nothing flashes unfiltered. */
+   before any script runs, so nothing flashes unfiltered. Tweets decided in the
+   same task (keywords, cached verdicts) never paint in this state, so they don't
+   flicker. Slower ones fade in once cleared. Blur and shimmer were dropped: they
+   were costly on image tweets and read as flicker while scrolling. */
 article[data-testid="tweet"]:not([data-ff]) > *,
 article[data-ff="pending"] > * {
-  filter: blur(18px) saturate(0.5);
+  opacity: 0;
   pointer-events: none;
-  transition: filter 0.2s ease-out;
-}
-article[data-testid="tweet"]:not([data-ff])::after,
-article[data-ff="pending"]::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(100deg, transparent 35%, rgba(214, 58, 39, 0.12) 50%, transparent 65%);
-  background-size: 250% 100%;
-  animation: ff-scan 1.4s linear infinite;
 }
 
-/* Tweets that pass: the blur clears quickly. */
-article[data-ff="shown"] > * { transition: filter 0.15s ease-out; }
+/* Tweets that pass fade in. */
+article[data-ff="shown"] > * { transition: opacity 0.18s ease-out; }
 
 /* Step 1 of hiding: the tweet blurs and fades out in place. */
 article[data-ff="hiding"] > * {
@@ -114,14 +106,12 @@ article[data-ff="revealed"] > * { animation: ff-reveal 0.35s ease-out; }
 .ff-toast-title { font-weight: 600; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .ff-toast-sub { font-size: 12.5px; color: rgba(255, 255, 255, 0.65); }
 
-@keyframes ff-scan { from { background-position: 125% 0; } to { background-position: -125% 0; } }
 @keyframes ff-flash { from { background-color: rgba(214, 58, 39, 0.2); } to { background-color: transparent; } }
 @keyframes ff-pop { 0% { transform: scale(0.4); } 100% { transform: scale(1); } }
 @keyframes ff-slide { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
 @keyframes ff-reveal { from { opacity: 0; filter: blur(8px); } to { opacity: 1; filter: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  article[data-testid="tweet"]::after,
   article[data-ff], article[data-ff] > *, article[data-ff]::before, article[data-ff]::after,
   .ff-toast, .ff-toast-icon {
     animation: none !important;
