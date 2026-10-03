@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scarecrow settings</title>
+<link rel="stylesheet" href="ui.css">
+</head>
+<body>
+<main class="page">
+  <header class="brand big">
+    <span class="logo" aria-hidden="true"></span>
+    <div>
+      <h1>Scarecrow</h1>
+      <p class="tagline">Describe what you're tired of seeing on X. Scarecrow hides it before you read it.</p>
+    </div>
+    <label class="toggle" title="Turn filtering on or off">
+      <input type="checkbox" id="enabled"><span class="track"><span class="thumb"></span></span>
+    </label>
+  </header>
+
+  <div class="testbanner" id="testBanner" hidden>
+    <b>Test mode</b> No API calls are made and no key is needed. About half of tweets are hidden at random, with made-up match scores.
+    Turn this off in <code>config.js</code>. Production builds (<code>node scripts/build.mjs</code>) always have it off.
+  </div>
+
+  <ol class="setup" id="setup" hidden>
+    <li id="stepFilter"><span class="dot"></span><span>Add at least one filter</span></li>
+    <li id="stepKey"><span class="dot"></span><span><a href="#connect">Connect your API key</a> so described filters and image checks can run</span></li>
+  </ol>
+
+  <section class="composer">
+    <label for="ruleText" class="lead">Don't show me tweets…</label>
+    <textarea id="ruleText" rows="2"></textarea>
+    <div class="row">
+      <div class="seg" role="radiogroup" aria-label="How to match">
+        <label><input type="radio" name="ruleType" value="ai" checked><span>Described in words</span></label>
+        <label><input type="radio" name="ruleType" value="keyword"><span>Containing keywords</span></label>
+      </div>
+      <button id="addRule" class="primary">Add filter</button>
+    </div>
+    <p class="hint" id="typeHint"></p>
+    <div class="examples" id="examples"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Your filters</h2>
+      <span class="hint" id="rulesSummary"></span>
+    </div>
+    <ul id="rules" class="rules"></ul>
+    <p id="emptyRules" class="empty">No filters yet. Pick an example above or write your own. It starts working right away.</p>
+  </section>
+
+  <section id="connect">
+    <h2>Connect</h2>
+    <p class="hint lead-hint">Described filters and image checks run through Jev, a decision model that's still in beta. Keyword filters work without a key.</p>
+    <div class="grid2">
+      <div class="field">
+        <label for="provider">Service</label>
+        <select id="provider">
+          <option value="openrouter">OpenRouter</option>
+          <option value="nanogpt">NanoGPT</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="apiKey" id="apiKeyLabel">API key</label>
+        <div class="input-btn">
+          <input type="password" id="apiKey" autocomplete="off" spellcheck="false" placeholder="Paste your key">
+          <button id="toggleKey" class="quiet" type="button">Show</button>
+        </div>
+      </div>
+    </div>
+    <p class="hint" id="keyHint"></p>
+  </section>
+
+  <section>
+    <h2>How strict</h2>
+    <div class="presets" role="radiogroup" aria-label="Strictness">
+      <label><input type="radio" name="preset" value="0.85"><span><b>Only clear matches</b><small>Hides less. Almost never hides something by mistake.</small></span></label>
+      <label><input type="radio" name="preset" value="0.7"><span><b>Balanced</b><small>Recommended for most filters.</small></span></label>
+      <label><input type="radio" name="preset" value="0.5"><span><b>Catch more</b><small>Hides borderline tweets too. Expect a few false alarms.</small></span></label>
+    </div>
+    <div class="fine">
+      <label for="threshold">Hide when Jev is at least <output id="thresholdOut"></output> sure</label>
+      <input type="range" id="threshold" min="0.3" max="0.95" step="0.05">
+    </div>
+  </section>
+
+  <section>
+    <h2>Images and videos</h2>
+    <label class="check"><input type="checkbox" id="reviewMedia">
+      <span>Check images and videos<small>Photos, GIFs and video thumbnails are checked before the tweet appears.</small></span></label>
+    <label class="check"><input type="checkbox" id="sampleVideo">
+      <span>Keep checking videos while they play<small>Looks at a few moments in each video. If one matches, the video pauses and the tweet is filtered.</small></span></label>
+  </section>
+
+  <section>
+    <h2>In your feed</h2>
+    <label class="check"><input type="checkbox" id="animateHides">
+      <span>Animate tweets as they're filtered<small>The tweet fades out and folds into a short note, so you can see the filter at work.</small></span></label>
+    <label class="check"><input type="checkbox" id="showToast">
+      <span>Show a counter when something is filtered<small>A small message at the bottom of the screen with today's total.</small></span></label>
+    <label class="check"><input type="checkbox" id="blurPending">
+      <span>Blur new tweets until they've been checked<small>Stops unwanted content from flashing on screen first.</small></span></label>
+    <div class="field">
+      <label for="displayMode">Filtered tweets</label>
+      <select id="displayMode">
+        <option value="collapse">Fold into a short note I can click to show</option>
+        <option value="remove">Remove completely</option>
+      </select>
+    </div>
+  </section>
+
+  <section>
+    <h2>Try it</h2>
+    <p class="hint lead-hint">Paste a tweet to see how well it matches each of your described filters.</p>
+    <textarea id="testText" rows="3" placeholder="Paste a tweet here"></textarea>
+    <input type="text" id="testImage" placeholder="Optional: an image link from pbs.twimg.com" spellcheck="false" class="mt8">
+    <div class="row"><button id="runTest">Check it</button><span id="testResult" class="result" aria-live="polite"></span></div>
+    <p id="testMedia" class="hint"></p>
+    <ul id="testScores" class="scores"></ul>
+  </section>
+
+  <details class="advanced">
+    <summary>Advanced</summary>
+    <div class="field">
+      <label for="model">Jev version</label>
+      <select id="model">
+        <option value="pinned">Jev 1.13 (stays the same)</option>
+        <option value="latest">Latest Jev (updates automatically)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="visionModel">Vision model for images and videos</label>
+      <input type="text" id="visionModel" spellcheck="false">
+      <p class="hint" id="visionHint"></p>
+    </div>
+  </details>
+</main>
+<div class="saved" id="saved" role="status">Saved</div>
+<script src="defaults.js"></script>
+<script src="config.js"></script>
+<script src="options.js"></script>
+</body>
+</html>

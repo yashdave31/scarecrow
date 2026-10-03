@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Scarecrow">
+  <rect width="128" height="128" rx="30" fill="#D63A27"/>
+  <g fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round">
+    <path d="M17 67 L8 62 M17 72 L7 72 M17 77 L8 82"/>
+    <path d="M111 67 L120 62 M111 72 L121 72 M111 77 L120 82"/>
+  </g>
+  <g fill="#fff">
+    <rect x="61" y="56" width="6" height="14" rx="3"/>
+    <rect x="17" y="66" width="94" height="12" rx="6"/>
+    <rect x="50" y="76" width="28" height="30" rx="7"/>
+    <circle cx="64" cy="46" r="15"/>
+  </g>
+  <g fill="#14141A">
+    <rect x="37" y="32" width="54" height="8" rx="4"/>
+    <rect x="47" y="12" width="34" height="24" rx="7"/>
+    <circle cx="58.5" cy="47" r="2.6"/><circle cx="69.5" cy="47" r="2.6"/>
+  </g>
+  <rect x="47" y="27" width="34" height="5" fill="#D63A27"/>
+  <path d="M58 54 H70" stroke="#14141A" stroke-width="2.4" stroke-linecap="round"/>
+</svg>

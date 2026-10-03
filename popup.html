@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><link rel="stylesheet" href="ui.css"></head>
+<body class="popup-body">
+<div class="popup">
+  <header class="brand">
+    <span class="logo" aria-hidden="true"></span>
+    <span class="brand-name">Scarecrow</span>
+    <label class="toggle" title="Turn filtering on or off">
+      <input type="checkbox" id="enabled"><span class="track"><span class="thumb"></span></span>
+    </label>
+  </header>
+
+  <div class="testbanner" id="testBanner" hidden>
+    <b>Test mode</b> About half of tweets are hidden at random. No API calls are made.
+  </div>
+
+  <div class="hero" id="hero">
+    <div class="count" id="today">0</div>
+    <div class="count-label" id="todayLabel">tweets kept out of your feed today</div>
+    <div class="count-sub" id="sub"></div>
+  </div>
+
+  <div class="callout" id="setup" hidden>
+    <p id="setupText"></p>
+    <button id="finishSetup" class="primary">Finish setup</button>
+  </div>
+
+  <div id="paused" class="callout muted" hidden>
+    <p>Filtering is paused. Your feed is showing everything.</p>
+  </div>
+
+  <section class="breakdown" id="breakdown" hidden>
+    <h2>Today, by filter</h2>
+    <ul id="byRule" class="bars"></ul>
+  </section>
+
+  <p class="error" id="error" hidden></p>
+
+  <div class="actions">
+    <button id="openOptions">Edit filters</button>
+  </div>
+</div>
+<script src="defaults.js"></script>
+<script src="config.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>
