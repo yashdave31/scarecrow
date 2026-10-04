@@ -58,6 +58,10 @@ One dial controls how sure Jev must be before a tweet is hidden:
 
 There is also a slider if you want an exact threshold.
 
+### Ads
+
+Turn on **Hide ads** in settings to fold promoted tweets, the ones X marks "Ad", into a note like any other. It needs no key and no model, and it is off by default. It reads X's English "Ad" label, so it will not catch ads in other languages yet.
+
 ### Images and videos
 
 With **Check images and videos** on, a vision model describes each photo, GIF or video thumbnail, and Jev judges that description together with the tweet text. With **Keep checking videos while they play** on, Scarecrow looks at a few frames as the video plays. If one matches, the video pauses and the tweet is filtered.
@@ -102,6 +106,7 @@ A few details that matter on X:
 - Jev and its Decisions API are in beta, so it will sometimes be wrong. Every hidden tweet leaves a note you can open.
 - Videos are judged on a few frames, not the audio. Some protected streams can't be sampled and fall back to the thumbnail.
 - X changes its markup now and then. Tweet extraction lives in `extract()` in `content.js`, which is where to look when it breaks.
+- Hide ads relies on X's English "Ad" label, and I have not been able to confirm it against every ad format on real X.
 - Only Chrome has been tested.
 
 ## Development

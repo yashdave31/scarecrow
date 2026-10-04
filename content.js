@@ -65,6 +65,16 @@
 
   // ---------- reading tweets ----------
 
+  // X marks promoted tweets with a small "Ad" label. English only for now; other
+  // languages use a different word (see the open issues).
+  const AD_LABELS = new Set(["Ad", "Promoted"]);
+  function isAd(article) {
+    for (const s of article.querySelectorAll("span")) {
+      if (s.childElementCount === 0 && AD_LABELS.has(s.textContent.trim()) && !s.closest('a, [data-testid="tweetText"]')) return true;
+    }
+    return false;
+  }
+
   function extract(article) {
     const timeLink = article.querySelector('a[href*="/status/"] time')?.closest("a");
     const idMatch = timeLink?.getAttribute("href")?.match(/status\/(\d+)/);
@@ -260,6 +270,9 @@
     if (article.dataset.ff === "hiding") return;
 
     if (revealed.has(t.id)) return setState(article, "revealed");
+
+    // 0. Ads: no model needed.
+    if (settings.hideAds && isAd(article)) return hide(article, t.id, { label: "an ad", meta: "promoted", ruleId: "ads" });
 
     // 1. Keyword rules: instant, free, local.
     const kw = keywordHit(`${t.author}\n${t.text}\n${t.quoted}`);

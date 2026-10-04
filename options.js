@@ -153,12 +153,12 @@ function bindSettings() {
   $("threshold").value = s.threshold;
   $("visionModel").value = s.visionModel;
   $("displayMode").value = s.displayMode;
-  for (const id of ["blurPending", "reviewMedia", "sampleVideo", "animateHides", "showToast"]) $(id).checked = s[id];
+  for (const id of ["blurPending", "reviewMedia", "sampleVideo", "animateHides", "showToast", "hideAds"]) $(id).checked = s[id];
   $("sampleVideo").disabled = !s.reviewMedia;
   renderProvider();
   renderThreshold();
 
-  for (const id of ["enabled", "blurPending", "sampleVideo", "animateHides", "showToast"]) $(id).onchange = (e) => save({ [id]: e.target.checked });
+  for (const id of ["enabled", "blurPending", "sampleVideo", "animateHides", "showToast", "hideAds"]) $(id).onchange = (e) => save({ [id]: e.target.checked });
   $("reviewMedia").onchange = (e) => { $("sampleVideo").disabled = !e.target.checked; save({ reviewMedia: e.target.checked }); };
   for (const id of ["model", "displayMode"]) $(id).onchange = (e) => save({ [id]: e.target.value });
   $("provider").onchange = (e) => save({ provider: e.target.value }).then(renderProvider);

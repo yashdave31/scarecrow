@@ -36,7 +36,7 @@ const today = () => new Date().toLocaleDateString("en-CA");
 
   // Per-filter breakdown
   const rows = Object.entries(stats.byRule || {})
-    .map(([id, n]) => ({ rule: s.rules.find((r) => r.id === id), n }))
+    .map(([id, n]) => ({ rule: id === "ads" ? { text: "Ads" } : s.rules.find((r) => r.id === id), n }))
     .filter((x) => x.rule)
     .sort((a, b) => b.n - a.n)
     .slice(0, 5);

@@ -13,6 +13,7 @@ const FF_DEFAULTS = {
   blurPending: true,        // blur tweets while they're being checked
   animateHides: true,       // play the fade-and-collapse animation when a tweet is filtered
   showToast: true,          // show a small counter at the bottom of the screen
+  hideAds: false,           // also fold promoted tweets (the ones X labels "Ad")
   displayMode: "collapse"   // "collapse" = one-line stub, "remove" = gone entirely
 };
 const FF_KEYS = Object.keys(FF_DEFAULTS);
