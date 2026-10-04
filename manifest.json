@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Scarecrow",
   "short_name": "Scarecrow",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Scare away the tweets you don't want. Describe them in plain words; Scarecrow filters your X feed, images and videos included.",
   "icons": {
     "16": "icons/icon16.png",
