@@ -162,31 +162,52 @@ function priceNote(m) {
   return perMillion > 0 ? `$${perMillion < 1 ? perMillion.toFixed(3).replace(/0+$/, "") : perMillion.toFixed(2)} per million tokens in` : "";
 }
 
+const OTHER = "__other__";
+const jevIds = (provider) => Object.values(provider.models);
+
 async function renderModelLists() {
-  const fill = (el, models) => el.replaceChildren(...models.map((m) => {
+  const provider = FF_PROVIDERS[s.provider] || FF_PROVIDERS.openrouter;
+  const current = provider.models[s.model] || s.model;
+  const free = $("freeOnly").checked;
+  const onOpenRouter = s.provider === "openrouter";
+  const all = onOpenRouter ? await loadModels() : [];
+
+  // Jev is always listed first, whatever the free filter says, because it is the default.
+  const entries = jevIds(provider).map((id) => {
+    const m = all.find((x) => x.id === id);
+    const label = id === provider.models.pinned ? "Jev 1.13 (default)" : id.includes("latest") ? "Jev latest (updates automatically)" : id;
+    return { id, label: m && priceNote(m) ? `${label}, ${priceNote(m)}` : label };
+  });
+  for (const m of all) {
+    if (!outputs(m).includes("decisions") || entries.some((e) => e.id === m.id) || notRecommended(m.id)) continue;
+    if (free && !isFree(m) && m.id !== current) continue;
+    entries.push({ id: m.id, label: [m.name, priceNote(m)].filter(Boolean).join(", ") });
+  }
+  const choose = entries.some((e) => e.id === current) ? current : OTHER;
+  $("model").replaceChildren(...[...entries, { id: OTHER, label: "Other model (type an ID)" }].map(({ id, label }) => {
+    const o = document.createElement("option");
+    o.value = id;
+    o.textContent = label;
+    return o;
+  }));
+  $("model").value = choose;
+  $("modelOther").hidden = choose !== OTHER;
+  if (choose === OTHER) $("modelOther").value = current;
+
+  const fillVision = (models) => $("visionModels").replaceChildren(...models.map((m) => {
     const o = document.createElement("option");
     o.value = m.id;
     o.label = [m.name, priceNote(m)].filter(Boolean).join(", ");
     return o;
   }));
-  const provider = FF_PROVIDERS[$("provider").value];
-  const id = $("model").value.trim();
-  if ($("provider").value !== "openrouter") {
-    fill($("decisionModels"), Object.values(provider.models).map((id) => ({ id, name: id, pricing: {} })));
-    fill($("visionModels"), []);
-    $("modelHint").textContent = "Type a decision model ID from your NanoGPT model list.";
-    return;
-  }
-  const all = await loadModels();
-  const free = $("freeOnly").checked;
-  const keep = (m) => !free || isFree(m);
-  fill($("decisionModels"), all.filter((m) => outputs(m).includes("decisions") && keep(m) && !notRecommended(m.id)));
-  fill($("visionModels"), all.filter((m) => outputs(m).includes("text") && m.architecture?.input_modalities?.includes("image") && keep(m)));
+  fillVision(all.filter((m) => outputs(m).includes("text") && m.architecture?.input_modalities?.includes("image") && (!free || isFree(m))));
+
   const notes = [];
-  if (!all.length) notes.push("Couldn't load the model list, but you can still type an ID.");
-  if (notRecommended(id)) notes.push("This model did not tell matching posts from non-matching ones in our test, so it is not recommended.");
-  else if (id && !/jev|mercury-decide/.test(id)) notes.push("Only Jev and Mercury Decide have been tried against the real API. This model may score differently, so adjust strictness if too much or too little is hidden.");
-  if (id.endsWith(":free")) notes.push("Free models allow 20 requests a minute and 50 a day (1,000 with $10 in credits), so heavy scrolling can hit the cap.");
+  if (onOpenRouter && !all.length) notes.push("Couldn't load the model list, but you can still type an ID.");
+  if (!onOpenRouter) notes.push("Type a decision model ID from your NanoGPT model list.");
+  if (notRecommended(current)) notes.push("This model did not tell matching posts from non-matching ones in our test, so it is not recommended.");
+  else if (current && !/jev|mercury-decide/.test(current)) notes.push("Only Jev and Mercury Decide have been tried against the real API. This model may score differently, so adjust strictness if too much or too little is hidden.");
+  if (current.endsWith(":free")) notes.push("Free models allow 20 requests a minute and 50 a day (1,000 with $10 in credits), so heavy scrolling can hit the cap.");
   $("modelHint").textContent = notes.join(" ");
 }
 
@@ -206,7 +227,6 @@ function renderThreshold() {
 function bindSettings() {
   $("enabled").checked = s.enabled;
   $("apiKey").value = s.apiKey;
-  $("model").value = FF_PROVIDERS[s.provider]?.models[s.model] || s.model;
   $("freeOnly").checked = s.freeOnly;
   $("provider").value = s.provider;
   $("threshold").value = s.threshold;
@@ -221,7 +241,11 @@ function bindSettings() {
   for (const id of ["enabled", "blurPending", "sampleVideo", "animateHides", "showToast", "hideAds", "hideAiSlop"]) $(id).onchange = (e) => save({ [id]: e.target.checked });
   $("reviewMedia").onchange = (e) => { $("sampleVideo").disabled = !e.target.checked; save({ reviewMedia: e.target.checked }); };
   $("displayMode").onchange = (e) => save({ displayMode: e.target.value });
-  $("model").onchange = (e) => save({ model: e.target.value.trim() || FF_DEFAULTS.model }).then(renderModelLists);
+  $("model").onchange = (e) => {
+    if (e.target.value === OTHER) { $("modelOther").hidden = false; $("modelOther").focus(); return; }
+    save({ model: e.target.value }).then(renderModelLists);
+  };
+  $("modelOther").onchange = (e) => save({ model: e.target.value.trim() || FF_DEFAULTS.model }).then(renderModelLists);
   $("freeOnly").onchange = (e) => save({ freeOnly: e.target.checked }).then(renderModelLists);
   $("provider").onchange = (e) => save({ provider: e.target.value }).then(() => { renderProvider(); renderModelLists(); });
   $("apiKey").onchange = (e) => save({ apiKey: e.target.value.trim() });

@@ -54,7 +54,7 @@
 
   <section id="connect">
     <h2>Connect</h2>
-    <p class="hint lead-hint">Described filters and image checks run through Jev, a decision model that's still in beta. Keyword filters work without a key.</p>
+    <p class="hint lead-hint">Described filters and image checks run through a decision model, Jev by default. Keyword filters work without a key.</p>
     <div class="grid2">
       <div class="field">
         <label for="provider">Service</label>
@@ -74,8 +74,8 @@
     <p class="hint" id="keyHint"></p>
     <div class="field">
       <label for="model">Decision model</label>
-      <input type="text" id="model" list="decisionModels" spellcheck="false" autocomplete="off" placeholder="typesafe/jev-1.13">
-      <datalist id="decisionModels"></datalist>
+      <select id="model"></select>
+      <input type="text" id="modelOther" class="mt8" hidden spellcheck="false" autocomplete="off" placeholder="Model ID, for example typesafe/jev-1.13">
       <p class="hint" id="modelHint"></p>
     </div>
     <label class="check"><input type="checkbox" id="freeOnly">
