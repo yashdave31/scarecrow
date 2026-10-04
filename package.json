@@ -4,7 +4,7 @@
   "scripts": {
     "build": "node scripts/build.mjs"
   },
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Chrome extension that hides tweets you describe in plain words, using TypeSafe's Jev decision model.",
   "license": "MIT"
 }
