@@ -14,9 +14,27 @@ const FF_DEFAULTS = {
   animateHides: true,       // play the fade-and-collapse animation when a tweet is filtered
   showToast: true,          // show a small counter at the bottom of the screen
   hideAds: false,           // also fold promoted tweets (the ones X labels "Ad")
+  hideAiSlop: false,        // also fold posts that read like generic AI filler (judged by Jev)
   displayMode: "collapse"   // "collapse" = one-line stub, "remove" = gone entirely
 };
 const FF_KEYS = Object.keys(FF_DEFAULTS);
+
+// Built-in described filter behind the "AI slop" setting. The text finishes the
+// sentence "Don't show me tweets ...". It has its own floor on the threshold because
+// style is a fuzzier call than a topic, and a wrong hide is worse than a missed one.
+const FF_SLOP_RULE = {
+  id: "ai-slop",
+  type: "ai",
+  enabled: true,
+  label: "AI slop",
+  minThreshold: 0.8,
+  text: "that read like generic AI-written filler: padded advice, formulaic hooks, listicles with a tidy moral, invented personal stories, or buzzword-heavy takes with no specific detail"
+};
+
+// The user's own rules plus the built-in ones that are switched on.
+function ffRules(s) {
+  return s.hideAiSlop ? [...s.rules, FF_SLOP_RULE] : s.rules;
+}
 
 const FF_PROVIDERS = {
   openrouter: {

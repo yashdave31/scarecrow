@@ -122,8 +122,8 @@ function renderRules(newId) {
 // ---------- setup checklist ----------
 
 function renderSetup() {
-  const hasFilter = s.rules.some((r) => r.enabled);
-  const needsKey = s.rules.some((r) => r.enabled && r.type === "ai") || s.reviewMedia;
+  const hasFilter = s.rules.some((r) => r.enabled) || s.hideAds || s.hideAiSlop;
+  const needsKey = ffRules(s).some((r) => r.enabled && r.type === "ai") || s.reviewMedia;
   const hasKey = !!s.apiKey;
   $("stepFilter").classList.toggle("done", hasFilter);
   $("stepKey").classList.toggle("done", hasKey);
@@ -153,12 +153,12 @@ function bindSettings() {
   $("threshold").value = s.threshold;
   $("visionModel").value = s.visionModel;
   $("displayMode").value = s.displayMode;
-  for (const id of ["blurPending", "reviewMedia", "sampleVideo", "animateHides", "showToast", "hideAds"]) $(id).checked = s[id];
+  for (const id of ["blurPending", "reviewMedia", "sampleVideo", "animateHides", "showToast", "hideAds", "hideAiSlop"]) $(id).checked = s[id];
   $("sampleVideo").disabled = !s.reviewMedia;
   renderProvider();
   renderThreshold();
 
-  for (const id of ["enabled", "blurPending", "sampleVideo", "animateHides", "showToast", "hideAds"]) $(id).onchange = (e) => save({ [id]: e.target.checked });
+  for (const id of ["enabled", "blurPending", "sampleVideo", "animateHides", "showToast", "hideAds", "hideAiSlop"]) $(id).onchange = (e) => save({ [id]: e.target.checked });
   $("reviewMedia").onchange = (e) => { $("sampleVideo").disabled = !e.target.checked; save({ reviewMedia: e.target.checked }); };
   for (const id of ["model", "displayMode"]) $(id).onchange = (e) => save({ [id]: e.target.value });
   $("provider").onchange = (e) => save({ provider: e.target.value }).then(renderProvider);
@@ -194,13 +194,13 @@ $("runTest").onclick = async () => {
   $("runTest").disabled = false;
   if (res.error) { out.className = "result bad"; out.textContent = res.error; return; }
   if (res.result.media?.length) $("testMedia").textContent = "What the image shows: " + res.result.media[0].description;
-  if (!FF_MOCK && !s.rules.some((r) => r.enabled && r.type === "ai")) { out.textContent = "Add a described filter to see match scores."; return; }
+  if (!FF_MOCK && !ffRules(s).some((r) => r.enabled && r.type === "ai")) { out.textContent = "Add a described filter to see match scores."; return; }
   out.className = "result " + (res.result.hide ? "hit" : "miss");
   out.textContent = res.result.hide ? `Would be filtered: ${res.result.reason}` : "Would be shown";
-  $("testScores").replaceChildren(...res.result.scores.map(({ rule, p }) => {
+  $("testScores").replaceChildren(...res.result.scores.map(({ rule, p, at }) => {
     const li = document.createElement("li");
     const bar = document.createElement("span");
-    bar.className = "bar" + (p >= s.threshold ? " over" : "");
+    bar.className = "bar" + (p >= (at ?? s.threshold) ? " over" : "");
     bar.style.setProperty("--p", p);
     const label = document.createElement("span");
     label.textContent = `${Math.round(p * 100)}%  ${rule}`;
