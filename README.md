@@ -55,6 +55,7 @@ Described filters use Jev by default. OpenRouter now lists other decision models
 - Models other than Jev have not been compared against it here. Their scores may be calibrated differently, so adjust the strictness setting if too much or too little is hidden.
 - Free models (IDs ending in `:free`) are limited by OpenRouter to 20 requests a minute and 50 a day, or 1,000 a day after you buy $10 of credits. Scarecrow makes one request per post, so 50 requests is about 50 posts. Models priced at 0 without the `:free` ending are not covered by that limit, according to OpenRouter's docs.
 - Jev is cheap to begin with, about $0.04 per million input tokens. My estimate is a few cents per thousand posts, but check your own usage on OpenRouter.
+- To try models against the real API before using them, run `OPENROUTER_API_KEY=... node scripts/try-models.mjs` (optionally followed by model IDs). It sends three sample posts to each model and shows the scores. The key is read from your environment and never saved.
 - If a call fails, including hitting a limit, the post is shown and the popup says why.
 - Image checks use the separate vision model under **Advanced**. Its default is a paid model, so pick a free one there if you want to avoid charges. That list shows image-capable models.
 
