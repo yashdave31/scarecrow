@@ -132,6 +132,58 @@ function renderSetup() {
 
 // ---------- settings ----------
 
+// ---------- model lists ----------
+// OpenRouter lists decision models (output type "decisions") only when asked for all
+// output types. The list is public and needs no key. Other providers type the ID in.
+
+let modelList = null;
+async function loadModels() {
+  if (modelList) return modelList;
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/models?output_modalities=all");
+    modelList = res.ok ? (await res.json()).data || [] : [];
+  } catch {
+    modelList = [];
+  }
+  return modelList;
+}
+
+const isFree = (m) => m.pricing?.prompt === "0" && m.pricing?.completion === "0";
+const outputs = (m) => m.architecture?.output_modalities || [];
+
+function priceNote(m) {
+  if (isFree(m)) return "free";
+  const perMillion = Number(m.pricing?.prompt) * 1e6;
+  return perMillion > 0 ? `$${perMillion < 1 ? perMillion.toFixed(3).replace(/0+$/, "") : perMillion.toFixed(2)} per million tokens in` : "";
+}
+
+async function renderModelLists() {
+  const fill = (el, models) => el.replaceChildren(...models.map((m) => {
+    const o = document.createElement("option");
+    o.value = m.id;
+    o.label = [m.name, priceNote(m)].filter(Boolean).join(", ");
+    return o;
+  }));
+  const provider = FF_PROVIDERS[$("provider").value];
+  const id = $("model").value.trim();
+  if ($("provider").value !== "openrouter") {
+    fill($("decisionModels"), Object.values(provider.models).map((id) => ({ id, name: id, pricing: {} })));
+    fill($("visionModels"), []);
+    $("modelHint").textContent = "Type a decision model ID from your NanoGPT model list.";
+    return;
+  }
+  const all = await loadModels();
+  const free = $("freeOnly").checked;
+  const keep = (m) => !free || isFree(m);
+  fill($("decisionModels"), all.filter((m) => outputs(m).includes("decisions") && keep(m)));
+  fill($("visionModels"), all.filter((m) => outputs(m).includes("text") && m.architecture?.input_modalities?.includes("image") && keep(m)));
+  const notes = [];
+  if (!all.length) notes.push("Couldn't load the model list, but you can still type an ID.");
+  if (id && !/jev/.test(id)) notes.push("Models other than Jev have not been compared against it here. Scores may be calibrated differently, so adjust strictness if too much or too little is hidden.");
+  if (id.endsWith(":free")) notes.push("Free models allow 20 requests a minute and 50 a day (1,000 with $10 in credits), so heavy scrolling can hit the cap.");
+  $("modelHint").textContent = notes.join(" ");
+}
+
 function renderProvider() {
   const p = FF_PROVIDERS[$("provider").value];
   $("apiKeyLabel").textContent = `${p.name} API key`;
@@ -148,7 +200,8 @@ function renderThreshold() {
 function bindSettings() {
   $("enabled").checked = s.enabled;
   $("apiKey").value = s.apiKey;
-  $("model").value = s.model;
+  $("model").value = FF_PROVIDERS[s.provider]?.models[s.model] || s.model;
+  $("freeOnly").checked = s.freeOnly;
   $("provider").value = s.provider;
   $("threshold").value = s.threshold;
   $("visionModel").value = s.visionModel;
@@ -157,11 +210,14 @@ function bindSettings() {
   $("sampleVideo").disabled = !s.reviewMedia;
   renderProvider();
   renderThreshold();
+  renderModelLists();
 
   for (const id of ["enabled", "blurPending", "sampleVideo", "animateHides", "showToast", "hideAds", "hideAiSlop"]) $(id).onchange = (e) => save({ [id]: e.target.checked });
   $("reviewMedia").onchange = (e) => { $("sampleVideo").disabled = !e.target.checked; save({ reviewMedia: e.target.checked }); };
-  for (const id of ["model", "displayMode"]) $(id).onchange = (e) => save({ [id]: e.target.value });
-  $("provider").onchange = (e) => save({ provider: e.target.value }).then(renderProvider);
+  $("displayMode").onchange = (e) => save({ displayMode: e.target.value });
+  $("model").onchange = (e) => save({ model: e.target.value.trim() || FF_DEFAULTS.model }).then(renderModelLists);
+  $("freeOnly").onchange = (e) => save({ freeOnly: e.target.checked }).then(renderModelLists);
+  $("provider").onchange = (e) => save({ provider: e.target.value }).then(() => { renderProvider(); renderModelLists(); });
   $("apiKey").onchange = (e) => save({ apiKey: e.target.value.trim() });
   $("visionModel").onchange = (e) => save({ visionModel: e.target.value.trim() || FF_DEFAULTS.visionModel });
   $("threshold").oninput = renderThreshold;

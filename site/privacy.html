@@ -35,6 +35,7 @@ a{color:var(--accent)}
 <h2>What is sent to other services</h2>
 <p>Keyword filters run entirely in your browser and send nothing.</p>
 <p>Described filters and image checks need a model. When they run, Scarecrow sends the text of the tweet being checked, and your filter descriptions, to the provider you chose (OpenRouter or NanoGPT) using your own API key. If you turn on image checks, it also sends the tweet's images and a few frames of its videos to that provider. These requests go straight from your browser to the provider. We never see them. What the provider does with them is covered by its own privacy policy.</p>
+<p>The settings page can load OpenRouter's public list of models (openrouter.ai/api/v1/models) to fill the model pickers. That request carries no key and none of your data.</p>
 <p>Scarecrow fetches tweet images from X's image host (pbs.twimg.com) so it can pass them to the provider.</p>
 
 <h2>What we do not do</h2>
