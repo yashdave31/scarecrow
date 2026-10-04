@@ -72,6 +72,14 @@
       </div>
     </div>
     <p class="hint" id="keyHint"></p>
+    <div class="field">
+      <label for="model">Decision model</label>
+      <input type="text" id="model" list="decisionModels" spellcheck="false" autocomplete="off" placeholder="typesafe/jev-1.13">
+      <datalist id="decisionModels"></datalist>
+      <p class="hint" id="modelHint"></p>
+    </div>
+    <label class="check"><input type="checkbox" id="freeOnly">
+      <span>Only list free models<small>Free models (ending in :free) are rate limited. Models priced at 0 without that ending are not.</small></span></label>
   </section>
 
   <section>
@@ -129,15 +137,9 @@
   <details class="advanced">
     <summary>Advanced</summary>
     <div class="field">
-      <label for="model">Jev version</label>
-      <select id="model">
-        <option value="pinned">Jev 1.13 (stays the same)</option>
-        <option value="latest">Latest Jev (updates automatically)</option>
-      </select>
-    </div>
-    <div class="field">
       <label for="visionModel">Vision model for images and videos</label>
-      <input type="text" id="visionModel" spellcheck="false">
+      <input type="text" id="visionModel" list="visionModels" spellcheck="false" autocomplete="off">
+      <datalist id="visionModels"></datalist>
       <p class="hint" id="visionHint"></p>
     </div>
   </details>

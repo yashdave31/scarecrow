@@ -3,7 +3,8 @@ const FF_DEFAULTS = {
   enabled: true,
   provider: "openrouter",   // "openrouter" | "nanogpt"
   apiKey: "",
-  model: "pinned",          // Jev version: "pinned" (jev-1.13) | "latest"
+  model: "pinned",          // decision model: "pinned" (jev-1.13), "latest" (jev-latest) or any decision model ID
+  freeOnly: true,           // settings page: only list free decision models
   threshold: 0.7,           // hide when Jev's yes-probability for any filter is at or above this
   // Each rule: { id, type: "ai" | "keyword", text, enabled }
   rules: [],

@@ -52,7 +52,7 @@ async function loadContext() {
   return {
     s,
     provider,
-    jevModel: provider.models[s.model] || provider.models.pinned,
+    jevModel: provider.models[s.model] || s.model || provider.models.pinned,
     rules: ffRules(s).filter((r) => r.enabled && r.type === "ai" && r.text.trim()),
     wantMedia: s.reviewMedia && !!s.apiKey && s.rules.some((r) => r.enabled)
   };
@@ -230,12 +230,18 @@ async function askJev(ctx, t, media) {
     headers: { "content-type": "application/json", authorization: `Bearer ${ctx.s.apiKey}` },
     body: JSON.stringify({ model: ctx.jevModel, state, questions })
   });
-  if (!res.ok) throw new Error(`Jev API ${res.status}: ${await errorMessage(res)}`);
+  if (!res.ok) {
+    const msg = await errorMessage(res);
+    if (res.status === 429 && ctx.jevModel.endsWith(":free")) {
+      throw new Error("Free model limit reached. OpenRouter allows 20 requests a minute and 50 a day on free models (1,000 a day with $10 in credits). Try again later or pick another model.");
+    }
+    throw new Error(`${ctx.jevModel} ${res.status}: ${msg}`);
+  }
   const data = await res.json();
-  return ctx.rules.map((_, i) => {
-    const p = data.answers?.[`rule_${i}`]?.noul;
-    return typeof p === "number" ? p : 0;
-  });
+  const probs = ctx.rules.map((_, i) => data.answers?.[`rule_${i}`]?.noul);
+  // Other decision models may not answer yes/no questions the way Jev does.
+  if (!probs.some((p) => typeof p === "number")) throw new Error(`${ctx.jevModel} returned no yes/no answers. Try a different model.`);
+  return probs.map((p) => (typeof p === "number" ? p : 0));
 }
 
 // ---------- helpers ----------
