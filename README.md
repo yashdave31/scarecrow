@@ -6,6 +6,8 @@
 
 <p align="center">Scare away the tweets you don't want. Describe them in plain words, and Scarecrow hides them before you read them, images and videos included.</p>
 
+<p align="center"><a href="https://yashdave31.github.io/scarecrow/">Website</a> · <a href="../../releases">Download</a> · <a href="../../issues">Issues</a></p>
+
 ---
 
 Scarecrow is a Chrome extension for X (Twitter). You write filters the way you'd say them to a friend:
