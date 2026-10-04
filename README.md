@@ -52,7 +52,7 @@ The settings page has a few examples to start from. Click a filter's text to edi
 
 Described filters use Jev by default. OpenRouter now lists other decision models too (Perplexity Decider, LiquidAI D1, Cloudflare Clef, Inception Mercury Decide, Respan Span-01, Upstage Solar Decide and more). In settings, under **Connect**, **Decision model** takes any of them: pick one from the list or type an ID. The list is loaded from OpenRouter's public model list, and **Only list free models** narrows it.
 
-- Models other than Jev have not been compared against it here. Their scores may be calibrated differently, so adjust the strictness setting if too much or too little is hidden.
+- Tested against the real API with three sample posts: Jev and `inception/mercury-decide:free` separated them cleanly. Respan's Span-01 Lite did not (it scored a plain post higher than a matching one), so it is left out of the list. Every other model is untested. Scores may be calibrated differently from Jev's, so adjust the strictness setting if too much or too little is hidden.
 - Free models (IDs ending in `:free`) are limited by OpenRouter to 20 requests a minute and 50 a day, or 1,000 a day after you buy $10 of credits. Scarecrow makes one request per post, so 50 requests is about 50 posts. Models priced at 0 without the `:free` ending are not covered by that limit, according to OpenRouter's docs.
 - Jev is cheap to begin with, about $0.04 per million input tokens. My estimate is a few cents per thousand posts, but check your own usage on OpenRouter.
 - To try models against the real API before using them, run `OPENROUTER_API_KEY=... node scripts/try-models.mjs` (optionally followed by model IDs). It sends three sample posts to each model and shows the scores. The key is read from your environment and never saved.
@@ -123,7 +123,7 @@ A few details that matter on X:
 ## Limitations
 
 - AI slop is a judgment about style, not a detector. I have only tested the wiring with a fake model, not how well the built-in prompt performs on real feeds.
-- Other decision models were tested here against a fake endpoint, not the real ones, so how well any of them performs is unknown.
+- Of the other decision models, only Mercury Decide has been tried against the real API. The rest are untested.
 - Jev and its Decisions API are in beta, so it will sometimes be wrong. Every hidden tweet leaves a note you can open.
 - Videos are judged on a few frames, not the audio. Some protected streams can't be sampled and fall back to the thumbnail.
 - X changes its markup now and then. Tweet extraction lives in `extract()` in `content.js`, which is where to look when it breaks.
