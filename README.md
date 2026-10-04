@@ -60,6 +60,12 @@ One dial controls how sure Jev must be before a tweet is hidden:
 
 There is also a slider if you want an exact threshold.
 
+### AI slop
+
+Turn on **Hide AI slop** in settings to fold posts that read like generic AI filler: padded advice, formulaic hooks, listicles with a tidy moral, invented personal stories. Matches fold into a note labelled "AI slop". It uses the same model as described filters, so it needs an API key, and it is off by default.
+
+It judges writing style. It cannot tell who or what wrote a post, so it will get some wrong, and plain or non-native writing can be caught by mistake. To limit that, it only hides a post when the model is at least 80% sure, even if your strictness setting is lower. Tell us about misses and mistakes in an issue.
+
 ### Ads
 
 Turn on **Hide ads** in settings to fold promoted tweets, the ones X marks "Ad", into a note like any other. It needs no key and no model, and it is off by default. It reads X's English "Ad" label, so it will not catch ads in other languages yet.
@@ -105,6 +111,7 @@ A few details that matter on X:
 
 ## Limitations
 
+- AI slop is a judgment about style, not a detector. I have only tested the wiring with a fake model, not how well the built-in prompt performs on real feeds.
 - Jev and its Decisions API are in beta, so it will sometimes be wrong. Every hidden tweet leaves a note you can open.
 - Videos are judged on a few frames, not the audio. Some protected streams can't be sampled and fall back to the thumbnail.
 - X changes its markup now and then. Tweet extraction lives in `extract()` in `content.js`, which is where to look when it breaks.

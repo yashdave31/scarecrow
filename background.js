@@ -53,7 +53,7 @@ async function loadContext() {
     s,
     provider,
     jevModel: provider.models[s.model] || provider.models.pinned,
-    rules: s.rules.filter((r) => r.enabled && r.type === "ai" && r.text.trim()),
+    rules: ffRules(s).filter((r) => r.enabled && r.type === "ai" && r.text.trim()),
     wantMedia: s.reviewMedia && !!s.apiKey && s.rules.some((r) => r.enabled)
   };
 }
@@ -108,9 +108,10 @@ async function classifyFrame(tweet, frameDataUrl) {
 }
 
 function decide(id, rules, probs, threshold) {
-  const scores = rules.map((r, i) => ({ rule: r.text, ruleId: r.id, p: probs[i] ?? 0 }));
-  const top = scores.reduce((a, b) => (b.p > a.p ? b : a), { p: -1 });
-  const hide = top.p >= threshold;
+  const scores = rules.map((r, i) => ({ rule: r.label || r.text, ruleId: r.id, p: probs[i] ?? 0, at: Math.max(threshold, r.minThreshold || 0) }));
+  // A rule can ask for more certainty than the global setting, so compare each to its own bar.
+  const top = scores.reduce((a, b) => (b.p - b.at > a.p - a.at ? b : a), { p: -1, at: 0 });
+  const hide = top.p >= top.at;
   return {
     id,
     hide,
@@ -133,7 +134,7 @@ async function mockClassify(tweets, ctx) {
     const hide = ffMockRandom(key) < FF_CONFIG.mockHideRate;
     const pick = Math.floor(ffMockRandom(key + ":rule") * rules.length);
     const scores = rules.map((r, i) => ({
-      rule: r.text,
+      rule: r.label || r.text,
       ruleId: r.id,
       p: hide && i === pick ? 0.72 + 0.27 * ffMockRandom(key + ":p") : 0.03 + 0.3 * ffMockRandom(key + ":q" + i)
     }));

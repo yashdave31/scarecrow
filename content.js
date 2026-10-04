@@ -37,7 +37,7 @@
   }
 
   const hasAiRules = () => FF_MOCK ||
-    !!settings.apiKey && settings.rules.some((r) => r.enabled && r.type === "ai" && r.text.trim());
+    !!settings.apiKey && ffRules(settings).some((r) => r.enabled && r.type === "ai" && r.text.trim());
   const wantsMedia = () => settings.reviewMedia && !!settings.apiKey && settings.rules.some((r) => r.enabled);
 
   function keywordHit(haystack) {
@@ -50,7 +50,7 @@
 
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "local" || !Object.keys(changes).some((k) => FF_KEYS.includes(k))) return;
-    const rulesChanged = ["rules", "model", "provider", "apiKey", "threshold", "reviewMedia", "visionModel"].some((k) => k in changes);
+    const rulesChanged = ["rules", "hideAiSlop", "model", "provider", "apiKey", "threshold", "reviewMedia", "visionModel"].some((k) => k in changes);
     loadSettings().then(() => {
       if (rulesChanged) {
         generation++;

@@ -25,18 +25,18 @@ const today = () => new Date().toLocaleDateString("en-CA");
   $("sub").textContent = stats.total ? `${stats.total.toLocaleString()} since you started` : "Nothing scared off yet.";
 
   // Setup problems
-  const active = s.rules.filter((r) => r.enabled);
-  const needsKey = active.some((r) => r.type === "ai") && !s.apiKey;
-  if (!FF_MOCK && (!s.rules.length || needsKey)) {
+  const needsKey = ffRules(s).some((r) => r.enabled && r.type === "ai") && !s.apiKey;
+  const noFilters = !s.rules.length && !s.hideAds && !s.hideAiSlop;
+  if (!FF_MOCK && (noFilters || needsKey)) {
     $("setup").hidden = false;
-    $("setupText").textContent = !s.rules.length
+    $("setupText").textContent = noFilters
       ? "Add a filter and Scarecrow gets to work."
       : "Your described filters need an API key before they can run.";
   }
 
   // Per-filter breakdown
   const rows = Object.entries(stats.byRule || {})
-    .map(([id, n]) => ({ rule: id === "ads" ? { text: "Ads" } : s.rules.find((r) => r.id === id), n }))
+    .map(([id, n]) => ({ rule: id === "ads" ? { text: "Ads" } : ffRules(s).find((r) => r.id === id), n }))
     .filter((x) => x.rule)
     .sort((a, b) => b.n - a.n)
     .slice(0, 5);
@@ -46,7 +46,7 @@ const today = () => new Date().toLocaleDateString("en-CA");
     $("byRule").replaceChildren(...rows.map(({ rule, n }) => {
       const li = document.createElement("li");
       li.innerHTML = '<span class="bar-label"></span><span class="bar-n"></span><span class="bar"><span></span></span>';
-      li.querySelector(".bar-label").textContent = rule.text;
+      li.querySelector(".bar-label").textContent = rule.label || rule.text;
       li.querySelector(".bar-n").textContent = n;
       li.querySelector(".bar span").style.width = `${Math.max(6, (n / max) * 100)}%`;
       return li;
