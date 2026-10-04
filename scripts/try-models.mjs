@@ -39,13 +39,19 @@ async function decide(model, post) {
     };
   });
   const t0 = Date.now();
-  const res = await fetch("https://openrouter.ai/api/alpha/decisions", {
+  const send = (state) => fetch("https://openrouter.ai/api/alpha/decisions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model, state: { author: "someone", text: post.text }, questions })
+    body: JSON.stringify({ model, state, questions })
   });
+  // Same fallback as the extension: some models only take a plain-string state.
+  let res = await send({ author: "someone", text: post.text });
+  let body = await res.text();
+  if (res.status === 400 && /state/i.test(body)) {
+    res = await send(`author: someone\ntext: ${post.text}`);
+    body = await res.text();
+  }
   const ms = Date.now() - t0;
-  const body = await res.text();
   if (!res.ok) return { ms, error: `${res.status} ${body.slice(0, 140)}` };
   try {
     const answers = JSON.parse(body).answers || {};

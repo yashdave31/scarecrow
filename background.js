@@ -204,6 +204,16 @@ async function toDataUrl(url) {
 
 // ---------- decision step (Jev) ----------
 
+// Some models (Respan's, for one) only accept `state` as a plain string. Once a model
+// has refused the object form, it gets the string form from then on.
+const stringStateModels = new Set();
+
+function stateAsText(state) {
+  return Object.entries(state)
+    .map(([k, v]) => `${k.replace(/_/g, " ")}: ${typeof v === "string" ? v : JSON.stringify(v)}`)
+    .join("\n");
+}
+
 async function askJev(ctx, t, media) {
   const state = { author: t.author || "unknown", text: t.text || "(no text)" };
   if (t.quoted) state.quoted_tweet = t.quoted;
@@ -225,11 +235,19 @@ async function askJev(ctx, t, media) {
     };
   });
 
-  const res = await fetch(ctx.provider.decisionsUrl, {
+  const send = (asText) => fetch(ctx.provider.decisionsUrl, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${ctx.s.apiKey}` },
-    body: JSON.stringify({ model: ctx.jevModel, state, questions })
+    body: JSON.stringify({ model: ctx.jevModel, state: asText ? stateAsText(state) : state, questions })
   });
+  let res = await send(stringStateModels.has(ctx.jevModel));
+  if (res.status === 400 && !stringStateModels.has(ctx.jevModel)) {
+    const msg = await res.clone().text();
+    if (/state/i.test(msg)) {
+      stringStateModels.add(ctx.jevModel);
+      res = await send(true);
+    }
+  }
   if (!res.ok) {
     const msg = await errorMessage(res);
     if (res.status === 429 && ctx.jevModel.endsWith(":free")) {
