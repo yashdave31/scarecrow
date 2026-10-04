@@ -148,6 +148,11 @@ async function loadModels() {
   return modelList;
 }
 
+// Tried against the real API with three sample posts and did not tell matches from
+// non-matches, so they are left out of the picker. A typed ID still works.
+const NOT_RECOMMENDED = ["respan/"];
+const notRecommended = (id) => NOT_RECOMMENDED.some((p) => id.startsWith(p));
+
 const isFree = (m) => m.pricing?.prompt === "0" && m.pricing?.completion === "0";
 const outputs = (m) => m.architecture?.output_modalities || [];
 
@@ -175,11 +180,12 @@ async function renderModelLists() {
   const all = await loadModels();
   const free = $("freeOnly").checked;
   const keep = (m) => !free || isFree(m);
-  fill($("decisionModels"), all.filter((m) => outputs(m).includes("decisions") && keep(m)));
+  fill($("decisionModels"), all.filter((m) => outputs(m).includes("decisions") && keep(m) && !notRecommended(m.id)));
   fill($("visionModels"), all.filter((m) => outputs(m).includes("text") && m.architecture?.input_modalities?.includes("image") && keep(m)));
   const notes = [];
   if (!all.length) notes.push("Couldn't load the model list, but you can still type an ID.");
-  if (id && !/jev/.test(id)) notes.push("Models other than Jev have not been compared against it here. Scores may be calibrated differently, so adjust strictness if too much or too little is hidden.");
+  if (notRecommended(id)) notes.push("This model did not tell matching posts from non-matching ones in our test, so it is not recommended.");
+  else if (id && !/jev|mercury-decide/.test(id)) notes.push("Only Jev and Mercury Decide have been tried against the real API. This model may score differently, so adjust strictness if too much or too little is hidden.");
   if (id.endsWith(":free")) notes.push("Free models allow 20 requests a minute and 50 a day (1,000 with $10 in credits), so heavy scrolling can hit the cap.");
   $("modelHint").textContent = notes.join(" ");
 }
